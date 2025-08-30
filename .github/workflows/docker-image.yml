@@ -2,13 +2,13 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main", "master", "test", "develop" ]
+    branches: [ "main", "prod", "test" ]
   pull_request:
-    branches: [ "main", "master", "test" ]
+    branches: [ "main", "prod", "test" ]
 
 jobs:
   build-test:
-    if: github.ref == 'refs/heads/test' || github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
           SPRING_PROFILES_ACTIVE=test
           
   build-prod:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
