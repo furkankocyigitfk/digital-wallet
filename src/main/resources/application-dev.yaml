@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:digitalWallet;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+# Development specific configurations
+jwt:
+  secret: X9juUahlqib1eNF1hkNlwRV4J2jklpQK6UuYWxmlfhLFA0qzChTjtjzH7O50ffEwU46BGXOLXf+1CtByumhatBL/FHF41dxazOgwHaO/L8tkpAmLBSkM78v3jHE8xHW6l6Vxar5O4tUYTheK+TxuYN7oLU7cz1w6LjhDl9FACv9BHMVdmPXFMXS/KYa2Je+QDLhqXlHD0//8iMK0e+89hj6rhIuVsVYpQ==
+  expiration: 3600
+
+logging:
+  level:
+    com.furkan.digitalWallet: DEBUG
+    org.springframework.security: DEBUG
+    root: INFO
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
