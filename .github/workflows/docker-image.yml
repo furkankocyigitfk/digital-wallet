@@ -2,42 +2,11 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main", "prod", "test" ]
+    branches: [ "prod"]
   pull_request:
-    branches: [ "main", "prod", "test" ]
+    branches: [  "prod" ]
 
-jobs:
-  build-test:
-    if: github.ref == 'refs/heads/test'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-        
-    - name: Build with Maven
-      run: mvn clean package -Dspring.profiles.active=test
-      
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
-        
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/digital-wallet:test-latest
-        build-args: |
-          SPRING_PROFILES_ACTIVE=test
-          
+jobs:          
   build-prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
