@@ -1,26 +1,37 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:${DB_NAME:testdb};DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    password: ${DB_PASSWORD:}
   h2:
     console:
-      enabled: true
+      enabled: ${H2_CONSOLE_ENABLED:true}
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+    defer-datasource-initialization: ${DEFER_DATASOURCE_INITIALIZATION:true}
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+
 logging:
   level:
-    com.furkan.digitalWallet: DEBUG
+    com.furkan.digitalWallet: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    root: ${ROOT_LOG_LEVEL:INFO}
+
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
+
 jwt:
-  secret: X9juUahlqib1eNF1hkNlwRV4J2jklpQK6UuYWxmlfhLFA0qzChTjtjzH7O50ffEwU46BGXOLXf+1CtByumhatBL/FHF41dxazOgwHaO/L8tkpAmLBSkM78v3jHE8xHW6l6Vxar5O4tUYTheK+TxuYN7oLU7cz1w6LjhDl9FACv9BHMVdmPXFMXS/KYa2Je+QDLhqXlHD0//8iMK0e+89hj6rhIuVsVYpQ==
+  secret: ${JWT_SECRET:X9juUahlqib1eNF1hkNlwRV4J2jklpQK6UuYWxmlfhLFA0qzChTjtjzH7O50ffEwU46BGXOLXf+1CtByumhatBL/FHF41dxazOgwHaO/L8tkpAmLBSkM78v3jHE8xHW6l6Vxar5O4tUYTheK+TxuYN7oLU7cz1w6LjhDl9FACv9BHMVdmPXFMXS/KYa2Je+QDLhqXlHD0//8iMK0e+89hj6rhIuVsVYpQ==}
   expiration: 3600
+
 springdoc:
   swagger-ui:
-    enabled: true
+    enabled: ${SWAGGER_ENABLED:true}
   api-docs:
-    enabled: true
+    enabled: ${SWAGGER_ENABLED:true}
   packages-to-scan: com.furkan.digitalWallet.controller
   paths-to-match: /**
 
-data.init: true
+data.init: false

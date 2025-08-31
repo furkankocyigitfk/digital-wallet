@@ -1,181 +1,303 @@
-# Digital Wallet Application
+# Digital Wallet API
 
-A Spring Boot-based digital wallet application with multi-environment support (Development, Test, Production).
+Digital Wallet API, kullanıcıların çoklu para birimi cüzdanları oluşturabileceği, para transferi yapabileceği ve işlem
+geçmişini takip edebileceği bir Spring Boot uygulamasıdır.
 
-## 🏗️ Architecture Overview
+## Teknoloji Stack
 
-This application supports three distinct environments:
+- **Java**: 17
+- **Framework**: Spring Boot 3.5.5
+- **Security**: Spring Security + JWT
+- **Database**: H2 (In-Memory)
+- **ORM**: Spring Data JPA
+- **Build Tool**: Maven
+- **Documentation**: OpenAPI 3 (Swagger)
+- **Testing**: JUnit 5, Mockito
+- **Code Coverage**: JaCoCo
+- **Containerization**: Docker
 
-- **Development (dev)**: Local development with in-memory H2 database and test data initialization
-- **Test (test)**: Testing environment with in-memory H2 database and test data initialization  
-- **Production (prod)**: Production environment with file-based H2 database and no test data
+## Özellikler
 
-## 🚀 Quick Start
+### Temel Özellikler
 
-### Prerequisites
+- Kullanıcı kimlik doğrulama ve yetkilendirme (JWT)
+- Çoklu para birimi desteği (TRY, USD, EUR)
+- Cüzdan yönetimi
+- Para transferi işlemleri
+- İşlem geçmişi takibi
+- Role-based access control (CUSTOMER, EMPLOYEE)
 
-- Java 21
-- Maven 3.9+
-- Docker & Docker Compose
+### Güvenlik
 
-### Database Initialization
+- BCrypt şifreleme
+- JWT token tabanlı kimlik doğrulama
+- Method-level security
+- CORS yapılandırması
 
-The application uses two SQL files for database setup:
+### API Dokümantasyonu
 
-2. **data.sql**: Inserts test data (only in dev/test environments)
+- OpenAPI 3.0 spesifikasyonu
+- Swagger UI entegrasyonu
+- Otomatik API dokümantasyonu
 
-### Environment-Specific Settings
+## Proje Yapısı
 
-| Setting | Development | Test | Production |
-|---------|-------------|------|------------|
-| Database | H2 in-memory | H2 in-memory | H2 file-based |
-| Data Init | ✅ Yes | ✅ Yes | ❌ No |
-| H2 Console | ✅ Enabled | ✅ Enabled | ❌ Disabled |
-| Swagger | ✅ Enabled | ✅ Enabled | ❌ Disabled |
-| SQL Logging | ✅ Yes | ✅ Yes | ❌ No |
-| DDL Auto | create-drop | create-drop | update |
+```
+src/main/java/com/furkan/digitalWallet/
+├── config/
+│   ├── DataInitializer.java      # Test verileri
+│   └── SecurityConfig.java       # Güvenlik yapılandırması
+├── controller/
+│   ├── AuthController.java       # Kimlik doğrulama
+│   ├── WalletController.java     # Cüzdan işlemleri
+│   └── TransactionController.java # İşlem yönetimi
+├── entity/
+│   ├── Customer.java             # Müşteri entity
+│   ├── Wallet.java               # Cüzdan entity
+│   └── Transaction.java          # İşlem entity
+├── enums/
+│   ├── Role.java                 # Kullanıcı rolleri
+│   ├── Currency.java             # Para birimleri
+│   ├── TransactionType.java      # İşlem tipleri
+│   ├── TransactionStatus.java    # İşlem durumları
+│   └── OppositePartyType.java    # Karşı taraf tipleri
+├── repository/                   # Veri erişim katmanı
+├── service/                      # İş mantığı katmanı
+├── security/                     # Güvenlik bileşenleri
+├── request/                      # Request DTO'lar
+├── response/                     # Response DTO'lar
+└── exception/                    # Hata yönetimi
+```
 
-## 🔐 Security Configuration
+## Veritabanı Şeması
 
-### Default Test Users
+### Customer (Müşteri)
 
-The application comes with pre-configured test users (dev/test environments only):
+- id: Benzersiz kimlik
+- name: Ad
+- surname: Soyad
+- tckn: TC Kimlik No (11 karakter, benzersiz)
+- username: Kullanıcı adı (benzersiz)
+- password: Şifre (BCrypt hashli)
+- role: Kullanıcı rolü (CUSTOMER/EMPLOYEE)
 
-1. **Employee User**
-   - Username: `employee`
-   - Password: `password`
-   - Role: `EMPLOYEE`
-   - TCKN: `11111111111`
+### Wallet (Cüzdan)
 
-2. **Customer User**
-   - Username: `customer`
-   - Password: `password`
-   - Role: `CUSTOMER`
-   - TCKN: `22222222222`
-   - Wallets: Main TRY wallet and USD wallet (both with 0 balance)
+- id: Benzersiz kimlik
+- customer_id: Müşteri referansı
+- walletName: Cüzdan adı
+- currency: Para birimi (TRY/USD/EUR)
+- activeForShopping: Alışveriş için aktif
+- activeForWithdraw: Para çekme için aktif
+- balance: Toplam bakiye
+- usableBalance: Kullanılabilir bakiye
+- createdAt: Oluşturulma tarihi
 
-### JWT Configuration
+### Transaction (İşlem)
 
-- Development: Long-lived test secret
-- Test: Test-specific secret
-- Production: Must be set via environment variable
+- id: Benzersiz kimlik
+- wallet_id: Cüzdan referansı
+- amount: İşlem tutarı
+- type: İşlem tipi
+- oppositePartyType: Karşı taraf tipi
+- oppositeParty: Karşı taraf bilgisi
+- status: İşlem durumu
+- createdAt: Oluşturulma tarihi
+- updatedAt: Güncellenme tarihi
 
-## 📦 Docker Support
+## API Endpoints
 
-### Environment-Specific Docker Compose Files
+### Kimlik Doğrulama
 
-- `docker-compose.dev.yml`: Development environment
-- `docker-compose.test.yml`: Test environment  
-- `docker-compose.prod.yml`: Production environment
-- `docker-compose.yml`: Base configuration
+```
+POST /auth/login
+```
 
-### Building for Specific Environments
+### Cüzdan İşlemleri
+
+```
+GET    /wallets              # Kullanıcının cüzdanlarını listele
+POST   /wallets              # Yeni cüzdan oluştur
+GET    /wallets/{id}         # Cüzdan detayı
+PUT    /wallets/{id}         # Cüzdan güncelle
+DELETE /wallets/{id}         # Cüzdan sil
+POST   /wallets/{id}/deposit # Para yatır
+POST   /wallets/{id}/withdraw # Para çek
+POST   /wallets/transfer     # Para transferi
+```
+
+### İşlem Geçmişi
+
+```
+GET /transactions           # İşlem geçmişi
+GET /transactions/{id}      # İşlem detayı
+```
+
+## Çalıştırma
+
+### Gereksinimler
+
+- Java 17+
+- Maven 3.6+
+- Docker (opsiyonel)
+
+### Yerel Ortamda Çalıştırma
+
+1. Projeyi klonlayın:
 
 ```bash
-# Development
-docker-compose -f docker-compose.dev.yml up --build
-
-# Test
-docker-compose -f docker-compose.test.yml up --build
-
-# Production
-docker-compose -f docker-compose.prod.yml up --build
+git clone <repository-url>
+cd digital-wallet
 ```
 
-## 🚀 CI/CD with GitHub Actions
-
-The project includes automated CI/CD pipelines for all environments:
-
-### Workflows
-
-1. **CI Pipeline** (`ci.yml`)
-   - Runs on push/PR to main/develop
-   - Executes tests with test profile
-   - Generates test reports
-
-2. **Development Build** (`build-dev.yml`)
-   - Triggers on push to `develop` branch
-   - Builds Docker image for development
-   - Stores artifacts for deployment
-
-3. **Test Build** (`build-test.yml`)
-   - Triggers on push to `test` branch
-   - Builds Docker image for testing
-   - Uses test-specific secrets
-
-4. **Production Build** (`build-prod.yml`)
-   - Triggers on push to `main` branch or version tags
-   - Builds production Docker image
-   - Includes security scanning with Trivy
-   - Stores artifacts with longer retention
-
-### Required GitHub Secrets
-
-Set these secrets in your GitHub repository:
-
-- `TEST_JWT_SECRET`: JWT secret for test environment
-- `PROD_JWT_SECRET`: JWT secret for production environment
-- `PROD_DB_PASSWORD`: Database password for production
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and customize for your environment:
+2. Bağımlılıkları yükleyin:
 
 ```bash
-cp .env.example .env
+mvn clean install
 ```
 
-## 📁 Project Structure
+3. Uygulamayı başlatın:
 
-```
-src/
-├── main/
-│   ├── java/com/furkan/digitalWallet/
-│   └── resources/
-│       ├── application.yaml              # Base configuration
-│       ├── application-dev.yaml          # Development config
-│       ├── application-test.yaml         # Test config
-│       ├── application-prod.yaml         # Production config
-│       └── data.sql                      # Test data
-├── test/
-└── ...
-.github/
-└── workflows/                            # GitHub Actions
-docker-compose*.yml                       # Environment-specific Docker configs
-run-*.sh                                  # Environment runner scripts
+```bash
+mvn spring-boot:run
 ```
 
-## 🔍 API Documentation
+### Docker ile Çalıştırma
 
-When enabled (dev/test environments), Swagger UI is available at:
-- Development: http://localhost:8080/swagger-ui.html
-- Test: http://localhost:8081/swagger-ui.html
+#### Test Ortamı (Port 8080)
 
-## 🗄️ Database Access
+```bash
+docker-compose up app-test
+```
 
-H2 Console is available in dev/test environments:
-- Development: http://localhost:8080/h2-console
-- Test: http://localhost:8081/h2-console
+#### Production Ortamı (Port 8081)
 
-**Connection Details:**
-- JDBC URL: `jdbc:h2:mem:digitalWallet` (dev) / `jdbc:h2:mem:testdb` (test)
-- Username: `sa`
-- Password: `password` (dev) / `` (empty for test)
+```bash
+docker-compose up app-prod
+```
 
-## 🚨 Production Considerations
+## Test Kullanıcıları
 
-Before deploying to production:
+Uygulama başladığında aşağıdaki test kullanıcıları otomatik olarak oluşturulur:
 
-1. ✅ Set strong `JWT_SECRET` environment variable
-2. ✅ Set secure `DB_PASSWORD` environment variable  
-3. ✅ Verify Swagger UI is disabled
-4. ✅ Verify H2 Console is disabled
-5. ✅ Ensure no test data initialization
-6. ✅ Configure proper logging levels
-7. ✅ Set up monitoring and health checks
-8. ✅ Configure SSL/TLS termination
-9. ✅ Set up database backups for persistent storage
+### Employee
 
-## 📝 License
+- **Username**: employee
+- **Password**: employee123
+- **Role**: EMPLOYEE
 
-[Add your license information here]
+### Customers
+
+- **Username**: customer1, **Password**: customer123
+- **Username**: customer2, **Password**: password123
+- **Username**: customer3, **Password**: test123
+- **Username**: customer4, **Password**: demo123
+
+Her müşteri için farklı para birimlerinde cüzdanlar otomatik oluşturulur.
+
+## Konfigürasyon
+
+### Environment Değişkenleri
+
+| Değişken           | Varsayılan     | Açıklama               |
+|--------------------|----------------|------------------------|
+| DB_PASSWORD        | -              | Veritabanı şifresi     |
+| JWT_SECRET         | default-secret | JWT şifreleme anahtarı |
+| SERVER_PORT        | 8080           | Sunucu portu           |
+| SWAGGER_ENABLED    | true           | Swagger UI aktif/pasif |
+| LOG_LEVEL          | INFO           | Uygulama log seviyesi  |
+| DB_NAME            | testdb         | Veritabanı adı         |
+| HIBERNATE_DDL_AUTO | create-drop    | Hibernate DDL modu     |
+
+### Profiller
+
+- **default**: Geliştirme ortamı
+- **test**: Test ortamı (H2 console açık)
+- **prod**: Production ortamı (Swagger kapalı, güvenli ayarlar)
+
+## Testing
+
+### Unit Testleri Çalıştırma
+
+```bash
+mvn test
+```
+
+### Code Coverage Raporu
+
+```bash
+mvn test jacoco:report
+```
+
+Coverage raporu `target/site/jacoco/index.html` dosyasında görüntülenebilir.
+
+### Test Coverage Hedefi
+
+- Minimum %50 instruction coverage
+- Configuration ve main class'lar coverage'dan hariç tutulmuştur
+
+## API Dokümantasyonu
+
+Uygulama çalıştıktan sonra Swagger UI'a aşağıdaki adresten erişebilirsiniz:
+
+- **Test Ortamı**: http://localhost:8080/swagger-ui.html
+- **Production Ortamı**: Swagger kapalı
+
+### H2 Database Console
+
+Test ortamında H2 veritabanı console'una erişim:
+
+- **URL**: http://localhost:8080/h2-console
+- **JDBC URL**: jdbc:h2:mem:testdb
+- **Username**: sa
+- **Password**: (boş)
+
+## Güvenlik
+
+### JWT Token Kullanımı
+
+1. `/auth/login` endpoint'ine kullanıcı bilgileri gönderilir
+2. Başarılı girişte JWT token döner
+3. Diğer API çağrılarında Authorization header'ında token gönderilir:
+
+```
+Authorization: Bearer <jwt-token>
+```
+
+### Şifre Güvenliği
+
+- Tüm şifreler BCrypt algoritması ile hashlenmiştir
+- Minimum güvenlik gereksinimleri karşılanmaktadır
+
+## Geliştirme
+
+### Yeni Özellik Ekleme
+
+1. Entity/DTO oluşturun
+2. Repository interface'i tanımlayın
+3. Service katmanında iş mantığını uygulayın
+4. Controller'da endpoint'leri oluşturun
+5. Unit ve integration testlerini yazın
+
+### Code Quality
+
+- JaCoCo ile code coverage takibi
+- Maven Surefire ile unit testler
+- Maven Failsafe ile integration testler
+- Lombok ile boilerplate kod azaltma
+
+## Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
+
+## Katkı Sağlama
+
+1. Fork yapın
+2. Feature branch oluşturun
+3. Değişikliklerinizi commit edin
+4. Branch'inizi push edin
+5. Pull Request oluşturun
+
+## İletişim
+
+Proje ile ilgili sorularınız için issue açabilirsiniz.

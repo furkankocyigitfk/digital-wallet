@@ -1,18 +1,35 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:proddb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:${DB_NAME:proddb};DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    password: ${DB_PASSWORD:}
   h2:
     console:
-      enabled: false
+      enabled: ${H2_CONSOLE_ENABLED:false}
   jpa:
     hibernate:
-      ddl-auto: update
-    defer-datasource-initialization: false
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    defer-datasource-initialization: ${DEFER_DATASOURCE_INITIALIZATION:false}
   sql:
     init:
-      mode: never
+      mode: ${SQL_INIT_MODE:never}
+
+logging:
+  level:
+    com.furkan.digitalWallet: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    root: ${ROOT_LOG_LEVEL:INFO}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:default-secret}
+  expiration: 3600
+
 springdoc:
   swagger-ui:
-    enabled: false
+    enabled: ${SWAGGER_ENABLED:false}
   api-docs:
-    enabled: false
+    enabled: ${SWAGGER_ENABLED:false}
+
+data.init: false
