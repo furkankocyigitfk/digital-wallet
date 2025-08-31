@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@ConditionalOnProperty("data.init")
 @Component
 @AllArgsConstructor
 public class DataInitializer {
@@ -23,7 +24,6 @@ public class DataInitializer {
     private PasswordEncoder passwordEncoder;
 
     @PostConstruct
-    @ConditionalOnProperty(name = "data.init", havingValue = "false")
     public void init() {
         Customer employee = new Customer();
         employee.setName("Ayşe");
@@ -84,7 +84,7 @@ public class DataInitializer {
         tryWallet4.setUsableBalance(new BigDecimal("5000.00"));
         tryWallet4.setCreatedAt(LocalDateTime.now());
         walletRepository.save(tryWallet4);
-        
+
     }
 
     private void createWalletsForCustomer(Customer customer) {

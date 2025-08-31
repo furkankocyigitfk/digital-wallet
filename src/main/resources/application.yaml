@@ -34,4 +34,4 @@ springdoc:
   packages-to-scan: com.furkan.digitalWallet.controller
   paths-to-match: /**
 
-data.init: false
+data.init: true
