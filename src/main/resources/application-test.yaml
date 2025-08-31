@@ -33,4 +33,4 @@ springdoc:
   api-docs:
     enabled: ${SWAGGER_ENABLED:true}
 
-data.init: false
+data.init: ${DATA_INIT:true}
