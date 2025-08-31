@@ -2,13 +2,13 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "prod" ]
   pull_request:
-    branches: [ "test" ]
+    branches: [ "prod" ]
 
 jobs:
-  build-test:
-    if: github.ref == 'refs/heads/test'
+  build-prod:
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn clean package -Dspring.profiles.active=test
+        run: mvn clean package -Dspring.profiles.active=prod
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -29,13 +29,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push Docker image (test)
+      - name: Build and push Docker image (prod)
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/digital-wallet:test-latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/digital-wallet:test-${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/digital-wallet:prod-latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/digital-wallet:prod-${{ github.sha }}
           build-args: |
-            SPRING_PROFILES_ACTIVE=test
+            SPRING_PROFILES_ACTIVE=prod
