@@ -35,7 +35,7 @@ public class WalletService {
     public Wallet createWallet(WalletCreateRequest req, Customer actingUser) {
         Long customerId = (SecurityUtil.hasRole("EMPLOYEE") && req.getCustomerId() != null)
                 ? req.getCustomerId() : actingUser.getId();
-        // müşteri doğrulama ve referans
+
         if (!customerRepository.existsById(customerId)) {
             throw new NotFoundException("Müşteri bulunamadı: " + customerId);
         }
@@ -85,7 +85,7 @@ public class WalletService {
     @Transactional
     public Transaction withdraw(WithdrawRequest req, Customer actingUser) {
         Wallet wallet = getWalletForAccess(req.getWalletId(), actingUser);
-        // ayarlar: PAYMENT => shopping, IBAN => withdraw
+
         if (req.getOppositePartyType() == OppositePartyType.PAYMENT && !Boolean.TRUE.equals(wallet.getActiveForShopping())) {
             throw new BadRequestException("Cüzdan alışverişe kapalı");
         }
@@ -93,7 +93,7 @@ public class WalletService {
             throw new BadRequestException("Cüzdan çekime kapalı");
         }
 
-        // yeterli bakiye kontrolü (usable balance)
+
         if (wallet.getUsableBalance().compareTo(req.getAmount()) < 0) {
             throw new BadRequestException("Yetersiz kullanılabilir bakiye");
         }
@@ -109,7 +109,7 @@ public class WalletService {
         boolean isPending = req.getAmount().compareTo(BigDecimal.valueOf(1000)) > 0;
         if (isPending) {
             t.setStatus(TransactionStatus.PENDING);
-            // pending withdraw: sadece usable düşer
+
             wallet.setUsableBalance(wallet.getUsableBalance().subtract(req.getAmount()));
         } else {
             t.setStatus(TransactionStatus.APPROVED);

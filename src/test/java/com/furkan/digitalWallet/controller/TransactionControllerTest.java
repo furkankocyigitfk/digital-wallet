@@ -51,12 +51,12 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize static mock for SecurityUtil
+        
         securityUtilMockedStatic = mockStatic(SecurityUtil.class);
 
         customer = new Customer();
         customer.setUsername("testuser");
-        customer.setRole(Role.CUSTOMER); // Assuming Role is an enum in Customer
+        customer.setRole(Role.CUSTOMER); 
 
         depositRequest = new DepositRequest();
         withdrawRequest = new WithdrawRequest();
@@ -68,21 +68,21 @@ class TransactionControllerTest {
 
     @AfterEach
     void tearDown() {
-        // Close the static mock
+        
         securityUtilMockedStatic.close();
     }
 
     @Test
     void deposit_Successful_ReturnsTransaction() {
-        // Arrange
+        
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenReturn(customer);
         when(walletService.deposit(any(DepositRequest.class), any(Customer.class))).thenReturn(transaction);
 
-        // Act
+        
         ResponseEntity<Transaction> response = transactionController.deposit(depositRequest);
 
-        // Assert
+        
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
@@ -93,11 +93,11 @@ class TransactionControllerTest {
 
     @Test
     void deposit_CustomerNotFound_ThrowsException() {
-        // Arrange
+        
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenThrow(new RuntimeException("Customer not found"));
 
-        // Act & Assert
+        
         assertThrows(RuntimeException.class, () -> transactionController.deposit(depositRequest));
 
         verify(customerService).getByUsername("testuser");
@@ -106,15 +106,15 @@ class TransactionControllerTest {
 
     @Test
     void withdraw_Successful_ReturnsTransaction() {
-        // Arrange
+        
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenReturn(customer);
         when(walletService.withdraw(any(WithdrawRequest.class), any(Customer.class))).thenReturn(transaction);
 
-        // Act
+        
         ResponseEntity<Transaction> response = transactionController.withdraw(withdrawRequest);
 
-        // Assert
+        
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
@@ -125,11 +125,11 @@ class TransactionControllerTest {
 
     @Test
     void withdraw_CustomerNotFound_ThrowsException() {
-        // Arrange
+        
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenThrow(new RuntimeException("Customer not found"));
 
-        // Act & Assert
+        
         assertThrows(RuntimeException.class, () -> transactionController.withdraw(withdrawRequest));
 
         verify(customerService).getByUsername("testuser");
@@ -138,13 +138,13 @@ class TransactionControllerTest {
 
     @Test
     void decide_Successful_ReturnsTransaction() {
-        // Arrange
+        
         when(transactionService.decide(eq(1L), any(TransactionDecisionRequest.class))).thenReturn(transaction);
 
-        // Act
+        
         ResponseEntity<Transaction> response = transactionController.decide(1L, decisionRequest);
 
-        // Assert
+        
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
@@ -154,11 +154,11 @@ class TransactionControllerTest {
 
     @Test
     void decide_UnauthorizedAccess_ThrowsAccessDeniedException() {
-        // Arrange
+        
         when(transactionService.decide(eq(1L), any(TransactionDecisionRequest.class)))
                 .thenThrow(new AccessDeniedException("Access denied"));
 
-        // Act & Assert
+        
         assertThrows(AccessDeniedException.class, () -> transactionController.decide(1L, decisionRequest));
 
         verify(transactionService).decide(1L, decisionRequest);

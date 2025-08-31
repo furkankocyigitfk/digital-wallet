@@ -18,9 +18,9 @@ public class DepositRequest {
     private BigDecimal amount;
 
     @NotNull
-    private OppositePartyType oppositePartyType; // IBAN or PAYMENT
+    private OppositePartyType oppositePartyType;
 
     @NotBlank
-    private String source; // iban or payment id
+    private String source;
 }
 

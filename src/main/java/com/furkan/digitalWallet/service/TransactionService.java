@@ -31,19 +31,19 @@ public class TransactionService {
         Wallet w = t.getWallet();
         if (req.getStatus() == TransactionStatus.APPROVED) {
             if (t.getType() == TransactionType.DEPOSIT) {
-                // pending deposit: usable artar
+
                 w.setUsableBalance(w.getUsableBalance().add(t.getAmount()));
             } else {
-                // pending withdraw: balance azalır (usable zaten düşmüştü)
+
                 w.setBalance(w.getBalance().subtract(t.getAmount()));
             }
             t.setStatus(TransactionStatus.APPROVED);
         } else if (req.getStatus() == TransactionStatus.DENIED) {
             if (t.getType() == TransactionType.DEPOSIT) {
-                // deposit reddi: daha önce sadece balance artmıştı, geri al
+
                 w.setBalance(w.getBalance().subtract(t.getAmount()));
             } else {
-                // withdraw reddi: tutar usable'a geri eklenir
+
                 w.setUsableBalance(w.getUsableBalance().add(t.getAmount()));
             }
             t.setStatus(TransactionStatus.DENIED);

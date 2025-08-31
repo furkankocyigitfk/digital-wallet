@@ -58,7 +58,7 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldApproveDepositTransaction_WhenValidRequest() {
-        // Given
+        
         transaction.setType(TransactionType.DEPOSIT);
         decisionRequest.setStatus(TransactionStatus.APPROVED);
 
@@ -66,16 +66,16 @@ class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        // When
+        
         Transaction result = transactionService.decide(1L, decisionRequest);
 
-        // Then
+        
         assertNotNull(result);
         assertEquals(TransactionStatus.APPROVED, result.getStatus());
         assertNotNull(result.getUpdatedAt());
 
-        // Verify wallet balance increased for approved deposit
-        assertEquals(BigDecimal.valueOf(1300), wallet.getUsableBalance()); // 800 + 500
+        
+        assertEquals(BigDecimal.valueOf(1300), wallet.getUsableBalance()); 
 
         verify(transactionRepository).findById(1L);
         verify(transactionRepository).save(transaction);
@@ -84,7 +84,7 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldApproveWithdrawTransaction_WhenValidRequest() {
-        // Given
+        
         transaction.setType(TransactionType.WITHDRAW);
         decisionRequest.setStatus(TransactionStatus.APPROVED);
 
@@ -92,16 +92,16 @@ class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        // When
+        
         Transaction result = transactionService.decide(1L, decisionRequest);
 
-        // Then
+        
         assertNotNull(result);
         assertEquals(TransactionStatus.APPROVED, result.getStatus());
         assertNotNull(result.getUpdatedAt());
 
-        // Verify wallet balance decreased for approved withdraw
-        assertEquals(BigDecimal.valueOf(500), wallet.getBalance()); // 1000 - 500
+        
+        assertEquals(BigDecimal.valueOf(500), wallet.getBalance()); 
 
         verify(transactionRepository).save(transaction);
         verify(walletRepository).save(wallet);
@@ -109,7 +109,7 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldDenyDepositTransaction_WhenValidRequest() {
-        // Given
+        
         transaction.setType(TransactionType.DEPOSIT);
         decisionRequest.setStatus(TransactionStatus.DENIED);
 
@@ -117,16 +117,16 @@ class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        // When
+        
         Transaction result = transactionService.decide(1L, decisionRequest);
 
-        // Then
+        
         assertNotNull(result);
         assertEquals(TransactionStatus.DENIED, result.getStatus());
         assertNotNull(result.getUpdatedAt());
 
-        // Verify wallet balance reverted for denied deposit
-        assertEquals(BigDecimal.valueOf(500), wallet.getBalance()); // 1000 - 500
+        
+        assertEquals(BigDecimal.valueOf(500), wallet.getBalance()); 
 
         verify(transactionRepository).save(transaction);
         verify(walletRepository).save(wallet);
@@ -134,7 +134,7 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldDenyWithdrawTransaction_WhenValidRequest() {
-        // Given
+        
         transaction.setType(TransactionType.WITHDRAW);
         decisionRequest.setStatus(TransactionStatus.DENIED);
 
@@ -142,16 +142,16 @@ class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
 
-        // When
+        
         Transaction result = transactionService.decide(1L, decisionRequest);
 
-        // Then
+        
         assertNotNull(result);
         assertEquals(TransactionStatus.DENIED, result.getStatus());
         assertNotNull(result.getUpdatedAt());
 
-        // Verify usable balance restored for denied withdraw
-        assertEquals(BigDecimal.valueOf(1300), wallet.getUsableBalance()); // 800 + 500
+        
+        assertEquals(BigDecimal.valueOf(1300), wallet.getUsableBalance()); 
 
         verify(transactionRepository).save(transaction);
         verify(walletRepository).save(wallet);
@@ -159,10 +159,10 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldThrowNotFoundException_WhenTransactionNotExists() {
-        // Given
+        
         when(transactionRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // When & Then
+        
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> transactionService.decide(1L, decisionRequest));
 
@@ -173,11 +173,11 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldThrowBadRequestException_WhenTransactionNotPending() {
-        // Given
+        
         transaction.setStatus(TransactionStatus.APPROVED);
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
 
-        // When & Then
+        
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> transactionService.decide(1L, decisionRequest));
 
@@ -188,11 +188,11 @@ class TransactionServiceTest {
 
     @Test
     void decide_ShouldThrowBadRequestException_WhenInvalidStatus() {
-        // Given
+        
         decisionRequest.setStatus(TransactionStatus.PENDING);
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
 
-        // When & Then
+        
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> transactionService.decide(1L, decisionRequest));
 

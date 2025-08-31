@@ -55,17 +55,17 @@ class AuthControllerTest {
 
     @Test
     void login_SuccessfulAuthentication_ReturnsTokenAndUserDetails() {
-        // Arrange
+
         String token = "jwt-token";
         when(customerRepository.findByUsername("customer")).thenReturn(Optional.of(customer));
         when(jwtService.generateToken("customer", "CUSTOMER")).thenReturn(token);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
 
-        // Act
+
         ResponseEntity<?> response = authController.login(authRequest);
 
-        // Assert
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertNotNull(responseBody);
@@ -84,12 +84,12 @@ class AuthControllerTest {
 
     @Test
     void login_UserNotFound_ThrowsException() {
-        // Arrange
+        
         when(customerRepository.findByUsername("customer")).thenReturn(Optional.empty());
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(mock(Authentication.class));
 
-        // Act & Assert
+        
         assertThrows(RuntimeException.class, () -> authController.login(authRequest));
 
         verify(authenticationManager).authenticate(argThat(auth ->
@@ -102,12 +102,12 @@ class AuthControllerTest {
 
     @Test
     void login_AuthenticationFailure_ThrowsAuthenticationException() {
-        // Arrange
+        
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new AuthenticationException("Invalid credentials") {
                 });
 
-        // Act & Assert
+        
         assertThrows(AuthenticationException.class, () -> authController.login(authRequest));
 
         verify(authenticationManager).authenticate(argThat(auth ->
@@ -119,7 +119,7 @@ class AuthControllerTest {
 
     @Test
     void login_NullAuthRequest_ThrowsIllegalArgumentException() {
-        // Act & Assert
+        
         assertThrows(NullPointerException.class, () -> authController.login(null));
 
         verifyNoInteractions(authenticationManager, customerRepository, jwtService);

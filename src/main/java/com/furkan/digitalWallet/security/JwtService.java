@@ -36,7 +36,7 @@ public class JwtService {
                 .setIssuedAt(now)
                 .setExpiration(exp);
 
-        // Role null değilse ekle
+
         if (role != null) {
             builder.addClaims(Map.of("role", role));
         }

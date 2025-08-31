@@ -95,7 +95,7 @@ class WalletServiceTest {
 
     @Test
     void createWallet_ShouldCreateWallet_WhenValidRequest() {
-        // Given
+        
         when(customerRepository.existsById(1L)).thenReturn(true);
         when(walletRepository.existsByCustomerIdAndWalletNameIgnoreCase(1L, "Test Wallet")).thenReturn(false);
         when(customerRepository.getReferenceById(1L)).thenReturn(customer);
@@ -104,10 +104,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Wallet result = walletService.createWallet(walletCreateRequest, customer);
 
-            // Then
+            
             assertNotNull(result);
             verify(customerRepository).existsById(1L);
             verify(walletRepository).existsByCustomerIdAndWalletNameIgnoreCase(1L, "Test Wallet");
@@ -117,7 +117,7 @@ class WalletServiceTest {
 
     @Test
     void createWallet_ShouldCreateWalletForSpecificCustomer_WhenEmployeeRequest() {
-        // Given
+        
         walletCreateRequest.setCustomerId(1L);
         when(customerRepository.existsById(1L)).thenReturn(true);
         when(walletRepository.existsByCustomerIdAndWalletNameIgnoreCase(1L, "Test Wallet")).thenReturn(false);
@@ -127,10 +127,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(true);
 
-            // When
+            
             Wallet result = walletService.createWallet(walletCreateRequest, employee);
 
-            // Then
+            
             assertNotNull(result);
             verify(customerRepository).existsById(1L);
             verify(walletRepository).save(any(Wallet.class));
@@ -139,13 +139,13 @@ class WalletServiceTest {
 
     @Test
     void createWallet_ShouldThrowNotFoundException_WhenCustomerNotExists() {
-        // Given
+        
         when(customerRepository.existsById(1L)).thenReturn(false);
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> walletService.createWallet(walletCreateRequest, customer));
 
@@ -155,14 +155,14 @@ class WalletServiceTest {
 
     @Test
     void createWallet_ShouldThrowBadRequestException_WhenWalletNameExists() {
-        // Given
+        
         when(customerRepository.existsById(1L)).thenReturn(true);
         when(walletRepository.existsByCustomerIdAndWalletNameIgnoreCase(1L, "Test Wallet")).thenReturn(true);
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> walletService.createWallet(walletCreateRequest, customer));
 
@@ -172,17 +172,17 @@ class WalletServiceTest {
 
     @Test
     void listWallets_ShouldReturnWallets_WhenNoFilters() {
-        // Given
+        
         List<Wallet> wallets = Arrays.asList(wallet);
         when(walletRepository.findByCustomerId(1L)).thenReturn(wallets);
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             List<Wallet> result = walletService.listWallets(null, null, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(1, result.size());
             verify(walletRepository).findByCustomerId(1L);
@@ -191,17 +191,17 @@ class WalletServiceTest {
 
     @Test
     void listWallets_ShouldReturnFilteredWallets_WhenCurrencyProvided() {
-        // Given
+        
         List<Wallet> wallets = Arrays.asList(wallet);
         when(walletRepository.findByCustomerIdAndCurrency(1L, Currency.TRY)).thenReturn(wallets);
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             List<Wallet> result = walletService.listWallets(null, Currency.TRY, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(1, result.size());
             verify(walletRepository).findByCustomerIdAndCurrency(1L, Currency.TRY);
@@ -210,17 +210,17 @@ class WalletServiceTest {
 
     @Test
     void listWallets_ShouldReturnWalletsForSpecificCustomer_WhenEmployeeRequest() {
-        // Given
+        
         List<Wallet> wallets = Arrays.asList(wallet);
         when(walletRepository.findByCustomerId(1L)).thenReturn(wallets);
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(true);
 
-            // When
+            
             List<Wallet> result = walletService.listWallets(1L, null, employee);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(1, result.size());
             verify(walletRepository).findByCustomerId(1L);
@@ -229,7 +229,7 @@ class WalletServiceTest {
 
     @Test
     void deposit_ShouldCreateApprovedTransaction_WhenAmountUnder1000() {
-        // Given
+        
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
@@ -237,10 +237,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Transaction result = walletService.deposit(depositRequest, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(TransactionStatus.APPROVED, result.getStatus());
             assertEquals(TransactionType.DEPOSIT, result.getType());
@@ -252,7 +252,7 @@ class WalletServiceTest {
 
     @Test
     void deposit_ShouldCreatePendingTransaction_WhenAmountOver1000() {
-        // Given
+        
         depositRequest.setAmount(BigDecimal.valueOf(1500));
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -261,10 +261,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Transaction result = walletService.deposit(depositRequest, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(TransactionStatus.PENDING, result.getStatus());
             assertEquals(TransactionType.DEPOSIT, result.getType());
@@ -274,7 +274,7 @@ class WalletServiceTest {
 
     @Test
     void withdraw_ShouldCreateApprovedTransaction_WhenValidRequest() {
-        // Given
+        
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
@@ -282,10 +282,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Transaction result = walletService.withdraw(withdrawRequest, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(TransactionStatus.APPROVED, result.getStatus());
             assertEquals(TransactionType.WITHDRAW, result.getType());
@@ -295,7 +295,7 @@ class WalletServiceTest {
 
     @Test
     void withdraw_ShouldCreatePendingTransaction_WhenAmountOver1000() {
-        // Given
+        
         withdrawRequest.setAmount(BigDecimal.valueOf(1500));
         wallet.setUsableBalance(BigDecimal.valueOf(2000));
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
@@ -305,10 +305,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Transaction result = walletService.withdraw(withdrawRequest, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(TransactionStatus.PENDING, result.getStatus());
         }
@@ -316,7 +316,7 @@ class WalletServiceTest {
 
     @Test
     void withdraw_ShouldThrowBadRequestException_WhenWalletNotActiveForShopping() {
-        // Given
+        
         withdrawRequest.setOppositePartyType(OppositePartyType.PAYMENT);
         wallet.setActiveForShopping(false);
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
@@ -324,7 +324,7 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> walletService.withdraw(withdrawRequest, customer));
 
@@ -334,14 +334,14 @@ class WalletServiceTest {
 
     @Test
     void withdraw_ShouldThrowBadRequestException_WhenWalletNotActiveForWithdraw() {
-        // Given
+        
         wallet.setActiveForWithdraw(false);
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> walletService.withdraw(withdrawRequest, customer));
 
@@ -351,14 +351,14 @@ class WalletServiceTest {
 
     @Test
     void withdraw_ShouldThrowBadRequestException_WhenInsufficientBalance() {
-        // Given
+        
         wallet.setUsableBalance(BigDecimal.valueOf(100));
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> walletService.withdraw(withdrawRequest, customer));
 
@@ -368,7 +368,7 @@ class WalletServiceTest {
 
     @Test
     void listTransactions_ShouldReturnTransactions_WhenValidWalletId() {
-        // Given
+        
         Transaction transaction = new Transaction();
         transaction.setId(1L);
         List<Transaction> transactions = Arrays.asList(transaction);
@@ -379,10 +379,10 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             List<Transaction> result = walletService.listTransactions(1L, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(1, result.size());
             verify(transactionRepository).findByWalletOrderByCreatedAtDesc(wallet);
@@ -391,16 +391,16 @@ class WalletServiceTest {
 
     @Test
     void getWalletForAccess_ShouldReturnWallet_WhenCustomerOwnsWallet() {
-        // Given
+        
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When
+            
             Wallet result = walletService.getWalletForAccess(1L, customer);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(wallet.getId(), result.getId());
         }
@@ -408,16 +408,16 @@ class WalletServiceTest {
 
     @Test
     void getWalletForAccess_ShouldReturnWallet_WhenEmployee() {
-        // Given
+        
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
 
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(true);
 
-            // When
+            
             Wallet result = walletService.getWalletForAccess(1L, employee);
 
-            // Then
+            
             assertNotNull(result);
             assertEquals(wallet.getId(), result.getId());
         }
@@ -425,10 +425,10 @@ class WalletServiceTest {
 
     @Test
     void getWalletForAccess_ShouldThrowNotFoundException_WhenWalletNotExists() {
-        // Given
+        
         when(walletRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // When & Then
+        
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> walletService.getWalletForAccess(1L, customer));
 
@@ -437,7 +437,7 @@ class WalletServiceTest {
 
     @Test
     void getWalletForAccess_ShouldThrowBadRequestException_WhenCustomerDoesNotOwnWallet() {
-        // Given
+        
         Customer otherCustomer = new Customer();
         otherCustomer.setId(2L);
         when(walletRepository.findById(1L)).thenReturn(Optional.of(wallet));
@@ -445,7 +445,7 @@ class WalletServiceTest {
         try (MockedStatic<SecurityUtil> securityUtil = mockStatic(SecurityUtil.class)) {
             securityUtil.when(() -> SecurityUtil.hasRole("EMPLOYEE")).thenReturn(false);
 
-            // When & Then
+            
             BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> walletService.getWalletForAccess(1L, otherCustomer));
 
