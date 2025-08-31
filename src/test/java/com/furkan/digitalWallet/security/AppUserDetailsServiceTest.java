@@ -48,14 +48,14 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_CustomerExists_ReturnsUserDetails() {
-        // Given
+        
         String username = "testuser";
         when(customerRepository.findByUsername(username)).thenReturn(Optional.of(customer));
 
-        // When
+        
         UserDetails userDetails = appUserDetailsService.loadUserByUsername(username);
 
-        // Then
+        
         assertNotNull(userDetails);
         assertEquals("testuser", userDetails.getUsername());
         assertEquals("hashedPassword", userDetails.getPassword());
@@ -64,7 +64,7 @@ class AppUserDetailsServiceTest {
         assertTrue(userDetails.isAccountNonLocked());
         assertTrue(userDetails.isCredentialsNonExpired());
 
-        // Verify authorities
+        
         assertEquals(1, userDetails.getAuthorities().size());
         GrantedAuthority authority = userDetails.getAuthorities().iterator().next();
         assertEquals("ROLE_CUSTOMER", authority.getAuthority());
@@ -75,19 +75,19 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_EmployeeExists_ReturnsUserDetailsWithEmployeeRole() {
-        // Given
+        
         String username = "testemployee";
         when(customerRepository.findByUsername(username)).thenReturn(Optional.of(employee));
 
-        // When
+        
         UserDetails userDetails = appUserDetailsService.loadUserByUsername(username);
 
-        // Then
+        
         assertNotNull(userDetails);
         assertEquals("testemployee", userDetails.getUsername());
         assertEquals("hashedEmployeePassword", userDetails.getPassword());
 
-        // Verify authorities
+        
         assertEquals(1, userDetails.getAuthorities().size());
         GrantedAuthority authority = userDetails.getAuthorities().iterator().next();
         assertEquals("ROLE_EMPLOYEE", authority.getAuthority());
@@ -98,11 +98,11 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_UserNotFound_ThrowsUsernameNotFoundException() {
-        // Given
+        
         String username = "nonexistentuser";
         when(customerRepository.findByUsername(username)).thenReturn(Optional.empty());
 
-        // When & Then
+        
         UsernameNotFoundException exception = assertThrows(
                 UsernameNotFoundException.class,
                 () -> appUserDetailsService.loadUserByUsername(username)
@@ -116,11 +116,11 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_NullUsername_ThrowsUsernameNotFoundException() {
-        // Given
+        
         String username = null;
         when(customerRepository.findByUsername(username)).thenReturn(Optional.empty());
 
-        // When & Then
+        
         assertThrows(
                 UsernameNotFoundException.class,
                 () -> appUserDetailsService.loadUserByUsername(username)
@@ -131,11 +131,11 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_EmptyUsername_ThrowsUsernameNotFoundException() {
-        // Given
+        
         String username = "";
         when(customerRepository.findByUsername(username)).thenReturn(Optional.empty());
 
-        // When & Then
+        
         assertThrows(
                 UsernameNotFoundException.class,
                 () -> appUserDetailsService.loadUserByUsername(username)
@@ -146,19 +146,19 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_CustomerWithNullRole_ReturnsUserDetailsWithRoleNull() {
-        // Given
+        
         String username = "testuser";
         customer.setRole(null);
         when(customerRepository.findByUsername(username)).thenReturn(Optional.of(customer));
 
-        // When
+        
         UserDetails userDetails = appUserDetailsService.loadUserByUsername(username);
 
-        // Then
+        
         assertNotNull(userDetails);
         assertEquals("testuser", userDetails.getUsername());
 
-        // Verify authorities - should have ROLE_null
+        
         assertEquals(1, userDetails.getAuthorities().size());
         GrantedAuthority authority = userDetails.getAuthorities().iterator().next();
         assertEquals("ROLE_null", authority.getAuthority());
@@ -168,12 +168,12 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_RepositoryThrowsException_PropagatesException() {
-        // Given
+        
         String username = "testuser";
         when(customerRepository.findByUsername(username))
                 .thenThrow(new RuntimeException("Database connection error"));
 
-        // When & Then
+        
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
                 () -> appUserDetailsService.loadUserByUsername(username)
@@ -186,16 +186,16 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_CustomerHasSpecialCharactersInCredentials_ReturnsCorrectUserDetails() {
-        // Given
+        
         String username = "user@domain.com";
         customer.setUsername(username);
         customer.setPassword("password!@#$%^&*()");
         when(customerRepository.findByUsername(username)).thenReturn(Optional.of(customer));
 
-        // When
+        
         UserDetails userDetails = appUserDetailsService.loadUserByUsername(username);
 
-        // Then
+        
         assertNotNull(userDetails);
         assertEquals("user@domain.com", userDetails.getUsername());
         assertEquals("password!@#$%^&*()", userDetails.getPassword());
@@ -205,18 +205,18 @@ class AppUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_AuthorityCreation_VerifyCorrectFormat() {
-        // Given
+        
         String username = "testuser";
         when(customerRepository.findByUsername(username)).thenReturn(Optional.of(customer));
 
-        // When
+        
         UserDetails userDetails = appUserDetailsService.loadUserByUsername(username);
 
-        // Then
+        
         assertNotNull(userDetails.getAuthorities());
         assertFalse(userDetails.getAuthorities().isEmpty());
 
-        // Check that authority is of correct type
+        
         GrantedAuthority authority = userDetails.getAuthorities().iterator().next();
         assertInstanceOf(SimpleGrantedAuthority.class, authority);
         assertTrue(authority.getAuthority().startsWith("ROLE_"));

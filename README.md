@@ -1,292 +1,303 @@
 # Digital Wallet API
 
-Spring Boot tabanlı dijital cüzdan uygulaması. Müşteri ve çalışan rolleriyle cüzdan yönetimi, para transferi ve işlem
-onay süreçlerini yönetir.
+Digital Wallet API, kullanıcıların çoklu para birimi cüzdanları oluşturabileceği, para transferi yapabileceği ve işlem
+geçmişini takip edebileceği bir Spring Boot uygulamasıdır.
 
-## 🚀 Özellikler
+## Teknoloji Stack
 
-- **Kimlik Doğrulama**: JWT tabanlı authentication ve role-based authorization
-- **Roller**: CUSTOMER (müşteri) ve EMPLOYEE (çalışan)
-- **Cüzdan Yönetimi**: Çoklu para birimi desteği (TRY, USD, EUR)
-- **Para İşlemleri**: Para yatırma, çekme ve transfer
-- **Onay Süreci**: Çalışan onayı gerektiren işlemler
-- **API Dokümantasyonu**: Swagger/OpenAPI entegrasyonu
-- **Test Coverage**: JaCoCo ile yüksek test coverage
+- **Java**: 17
+- **Framework**: Spring Boot 3.5.5
+- **Security**: Spring Security + JWT
+- **Database**: H2 (In-Memory)
+- **ORM**: Spring Data JPA
+- **Build Tool**: Maven
+- **Documentation**: OpenAPI 3 (Swagger)
+- **Testing**: JUnit 5, Mockito
+- **Code Coverage**: JaCoCo
+- **Containerization**: Docker
 
-## 🛠️ Teknolojiler
+## Özellikler
 
-- **Java 21** + **Spring Boot 3.5.5**
-- **Spring Security** + **JWT**
-- **H2 Database** (tüm ortamlarda)
-- **Maven** build tool
-- **Docker** containerization
-- **JUnit 5** + **Mockito** testing
-- **Swagger/OpenAPI** documentation
-- **JaCoCo** test coverage
+### Temel Özellikler
 
-## ⚙️ Konfigürasyon Yönetimi
+- Kullanıcı kimlik doğrulama ve yetkilendirme (JWT)
+- Çoklu para birimi desteği (TRY, USD, EUR)
+- Cüzdan yönetimi
+- Para transferi işlemleri
+- İşlem geçmişi takibi
+- Role-based access control (CUSTOMER, EMPLOYEE)
 
-Uygulama profile-based konfigürasyon kullanır:
+### Güvenlik
 
-### 📁 Konfigürasyon Dosyaları
+- BCrypt şifreleme
+- JWT token tabanlı kimlik doğrulama
+- Method-level security
+- CORS yapılandırması
 
-- `application.yaml` - Ana konfigürasyon
-- `application-dev.yaml` - Development ortamı
-- `application-test.yaml` - Test ortamı
-- `application-prod.yaml` - Production ortamı
+### API Dokümantasyonu
 
-### 🔧 Profile Kullanımı
+- OpenAPI 3.0 spesifikasyonu
+- Swagger UI entegrasyonu
+- Otomatik API dokümantasyonu
 
-```bash
-# Development (varsayılan)
-./mvnw spring-boot:run
+## Proje Yapısı
 
-# Test profili ile çalıştırma
-./mvnw spring-boot:run -Dspring-boot.run.profiles=test
-
-# Production profili ile çalıştırma
-export SPRING_PROFILES_ACTIVE=prod
-export JWT_SECRET=your-production-jwt-secret
-export DB_URL=jdbc:h2:file:/app/data/digitalwallet_prod
-export DB_USERNAME=sa
-export DB_PASSWORD=password
-./mvnw spring-boot:run
+```
+src/main/java/com/furkan/digitalWallet/
+├── config/
+│   ├── DataInitializer.java      # Test verileri
+│   └── SecurityConfig.java       # Güvenlik yapılandırması
+├── controller/
+│   ├── AuthController.java       # Kimlik doğrulama
+│   ├── WalletController.java     # Cüzdan işlemleri
+│   └── TransactionController.java # İşlem yönetimi
+├── entity/
+│   ├── Customer.java             # Müşteri entity
+│   ├── Wallet.java               # Cüzdan entity
+│   └── Transaction.java          # İşlem entity
+├── enums/
+│   ├── Role.java                 # Kullanıcı rolleri
+│   ├── Currency.java             # Para birimleri
+│   ├── TransactionType.java      # İşlem tipleri
+│   ├── TransactionStatus.java    # İşlem durumları
+│   └── OppositePartyType.java    # Karşı taraf tipleri
+├── repository/                   # Veri erişim katmanı
+├── service/                      # İş mantığı katmanı
+├── security/                     # Güvenlik bileşenleri
+├── request/                      # Request DTO'lar
+├── response/                     # Response DTO'lar
+└── exception/                    # Hata yönetimi
 ```
 
-### 🔐 Environment Variables
+## Veritabanı Şeması
 
-**Development:**
+### Customer (Müşteri)
 
-- JWT secret yerleşik olarak tanımlı
-- H2 in-memory database
-- Swagger UI aktif
+- id: Benzersiz kimlik
+- name: Ad
+- surname: Soyad
+- tckn: TC Kimlik No (11 karakter, benzersiz)
+- username: Kullanıcı adı (benzersiz)
+- password: Şifre (BCrypt hashli)
+- role: Kullanıcı rolü (CUSTOMER/EMPLOYEE)
 
-**Test:**
+### Wallet (Cüzdan)
 
-- Test için güvenli JWT secret
-- H2 test database (ayrı in-memory)
-- Swagger UI devre dışı
-- Minimal logging
+- id: Benzersiz kimlik
+- customer_id: Müşteri referansı
+- walletName: Cüzdan adı
+- currency: Para birimi (TRY/USD/EUR)
+- activeForShopping: Alışveriş için aktif
+- activeForWithdraw: Para çekme için aktif
+- balance: Toplam bakiye
+- usableBalance: Kullanılabilir bakiye
+- createdAt: Oluşturulma tarihi
 
-**Production:**
+### Transaction (İşlem)
 
-- `JWT_SECRET` (zorunlu)
-- `DB_URL` - H2 file database path (opsiyonel, varsayılan: `/app/data/digitalwallet_prod`)
-- `DB_USERNAME` - Database kullanıcı adı (opsiyonel, varsayılan: sa)
-- `DB_PASSWORD` - Database şifresi (opsiyonel, varsayılan: password)
-- `H2_CONSOLE_ENABLED` - H2 console aktif/pasif (opsiyonel, varsayılan: false)
-- `SERVER_PORT` (opsiyonel, varsayılan: 8080)
+- id: Benzersiz kimlik
+- wallet_id: Cüzdan referansı
+- amount: İşlem tutarı
+- type: İşlem tipi
+- oppositePartyType: Karşı taraf tipi
+- oppositeParty: Karşı taraf bilgisi
+- status: İşlem durumu
+- createdAt: Oluşturulma tarihi
+- updatedAt: Güncellenme tarihi
 
-## 🏃‍♂️ Hızlı Başlangıç
+## API Endpoints
 
-### Development Ortamı
+### Kimlik Doğrulama
+
+```
+POST /auth/login
+```
+
+### Cüzdan İşlemleri
+
+```
+GET    /wallets              # Kullanıcının cüzdanlarını listele
+POST   /wallets              # Yeni cüzdan oluştur
+GET    /wallets/{id}         # Cüzdan detayı
+PUT    /wallets/{id}         # Cüzdan güncelle
+DELETE /wallets/{id}         # Cüzdan sil
+POST   /wallets/{id}/deposit # Para yatır
+POST   /wallets/{id}/withdraw # Para çek
+POST   /wallets/transfer     # Para transferi
+```
+
+### İşlem Geçmişi
+
+```
+GET /transactions           # İşlem geçmişi
+GET /transactions/{id}      # İşlem detayı
+```
+
+## Çalıştırma
+
+### Gereksinimler
+
+- Java 17+
+- Maven 3.6+
+- Docker (opsiyonel)
+
+### Yerel Ortamda Çalıştırma
+
+1. Projeyi klonlayın:
 
 ```bash
-# Uygulamayı çalıştır (dev profili)
-./mvnw spring-boot:run
+git clone <repository-url>
+cd digital-wallet
+```
 
-# Testleri çalıştır
-./mvnw test
+2. Bağımlılıkları yükleyin:
 
-# Test coverage raporu oluştur
-./mvnw jacoco:report
+```bash
+mvn clean install
+```
+
+3. Uygulamayı başlatın:
+
+```bash
+mvn spring-boot:run
 ```
 
 ### Docker ile Çalıştırma
 
-```bash
-# Development
-docker-compose up
-
-# Production
-docker-compose -f docker-compose.prod.yml up -d
-
-# Test ortamı
-docker-compose -f docker-compose.test.yml up
-```
-
-## 🌐 Erişim Noktaları
-
-- **API Base URL**: `http://localhost:8080`
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html` (sadece dev)
-- **H2 Console**: `http://localhost:8080/h2-console` (sadece dev)
-- **Health Check**: `http://localhost:8080/actuator/health`
-
-## 👥 Test Kullanıcıları
-
-| Role     | Username | Password |
-|----------|----------|----------|
-| CUSTOMER | customer | password |
-| EMPLOYEE | employee | password |
-
-## 🔐 API Kullanımı
-
-### 1. Giriş Yapma
+#### Test Ortamı (Port 8080)
 
 ```bash
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"customer","password":"password"}'
+docker-compose up app-test
 ```
 
-**Response:**
-
-```json
-{
-  "token": "eyJhbGciOiJIUzUxMiJ9...",
-  "role": "CUSTOMER",
-  "username": "customer"
-}
-```
-
-### 2. API Çağrıları
-
-Tüm korumalı endpoint'lerde token kullanın:
+#### Production Ortamı (Port 8081)
 
 ```bash
-Authorization: Bearer <token>
+docker-compose up app-prod
 ```
 
-## 📡 Ana API Endpoint'leri
+## Test Kullanıcıları
 
-### Kimlik Doğrulama
+Uygulama başladığında aşağıdaki test kullanıcıları otomatik olarak oluşturulur:
 
-- `POST /auth/login` - Kullanıcı girişi
+### Employee
 
-### Cüzdan İşlemleri
+- **Username**: employee
+- **Password**: employee123
+- **Role**: EMPLOYEE
 
-- `POST /wallets` - Yeni cüzdan oluştur
-- `GET /wallets` - Cüzdanları listele
-- `GET /wallets/{id}/transactions` - Cüzdan işlem geçmişi
+### Customers
 
-### Para İşlemleri
+- **Username**: customer1, **Password**: customer123
+- **Username**: customer2, **Password**: password123
+- **Username**: customer3, **Password**: test123
+- **Username**: customer4, **Password**: demo123
 
-- `POST /transactions/deposit` - Para yatırma
-- `POST /transactions/withdraw` - Para çekme
-- `POST /transactions/{id}/decision` - İşlem onayı/reddi (EMPLOYEE)
+Her müşteri için farklı para birimlerinde cüzdanlar otomatik oluşturulur.
 
-## 📝 API Örnekleri
+## Konfigürasyon
 
-### Cüzdan Oluşturma
+### Environment Değişkenleri
+
+| Değişken           | Varsayılan     | Açıklama               |
+|--------------------|----------------|------------------------|
+| DB_PASSWORD        | -              | Veritabanı şifresi     |
+| JWT_SECRET         | default-secret | JWT şifreleme anahtarı |
+| SERVER_PORT        | 8080           | Sunucu portu           |
+| SWAGGER_ENABLED    | true           | Swagger UI aktif/pasif |
+| LOG_LEVEL          | INFO           | Uygulama log seviyesi  |
+| DB_NAME            | testdb         | Veritabanı adı         |
+| HIBERNATE_DDL_AUTO | create-drop    | Hibernate DDL modu     |
+
+### Profiller
+
+- **default**: Geliştirme ortamı
+- **test**: Test ortamı (H2 console açık)
+- **prod**: Production ortamı (Swagger kapalı, güvenli ayarlar)
+
+## Testing
+
+### Unit Testleri Çalıştırma
 
 ```bash
-curl -X POST http://localhost:8080/wallets \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"currency":"TRY"}'
+mvn test
 ```
 
-### Para Yatırma
+### Code Coverage Raporu
 
 ```bash
-curl -X POST http://localhost:8080/transactions/deposit \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"walletId":1,"amount":100.00,"description":"İlk yatırım"}'
+mvn test jacoco:report
 ```
 
-### Para Çekme
+Coverage raporu `target/site/jacoco/index.html` dosyasında görüntülenebilir.
 
-```bash
-curl -X POST http://localhost:8080/transactions/withdraw \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"walletId":1,"amount":50.00,"description":"Para çekme"}'
-```
+### Test Coverage Hedefi
 
-## 🔧 Yapılandırma
+- Minimum %50 instruction coverage
+- Configuration ve main class'lar coverage'dan hariç tutulmuştur
 
-Proje ortam bazlı yapılandırma kullanır:
+## API Dokümantasyonu
 
-### Development (.env)
+Uygulama çalıştıktan sonra Swagger UI'a aşağıdaki adresten erişebilirsiniz:
 
-```bash
-SPRING_PROFILES_ACTIVE=dev
-DB_URL=jdbc:h2:mem:digitalwallet
-H2_CONSOLE_ENABLED=true
-SWAGGER_ENABLED=true
-LOG_LEVEL=DEBUG
-```
+- **Test Ortamı**: http://localhost:8080/swagger-ui.html
+- **Production Ortamı**: Swagger kapalı
 
-### Production (.env.prod)
+### H2 Database Console
 
-```bash
-SPRING_PROFILES_ACTIVE=prod
-DB_URL=jdbc:h2:file:/app/data/digitalwallet_prod
-H2_CONSOLE_ENABLED=false
-SWAGGER_ENABLED=false
-LOG_LEVEL=INFO
-```
+Test ortamında H2 veritabanı console'una erişim:
 
-### Test (.env.test)
+- **URL**: http://localhost:8080/h2-console
+- **JDBC URL**: jdbc:h2:mem:testdb
+- **Username**: sa
+- **Password**: (boş)
 
-```bash
-SPRING_PROFILES_ACTIVE=test
-DB_URL=jdbc:h2:mem:digitalwallet_test
-H2_CONSOLE_ENABLED=true
-SWAGGER_ENABLED=true
-LOG_LEVEL=DEBUG
-```
+## Güvenlik
 
-## 🧪 Test Coverage
+### JWT Token Kullanımı
 
-Proje %92 test coverage'a sahiptir:
-
-```bash
-# Test çalıştır ve coverage raporu oluştur
-./mvnw clean test jacoco:report
-
-# Coverage raporu görüntüle
-open target/site/jacoco/index.html
-```
-
-## 🐳 Docker Komutları
-
-```bash
-# Development ortamı
-docker-compose up
-
-# Production ortamı başlat
-docker-compose -f docker-compose.prod.yml up -d
-
-# Test ortamı başlat
-docker-compose -f docker-compose.test.yml up
-
-# Tüm container'ları durdur
-docker-compose down
-
-# Logları görüntüle
-docker-compose logs -f app
-```
-
-## 📋 İş Kuralları
-
-1. **Müşteriler** sadece kendi cüzdanlarını görebilir ve yönetebilir
-2. **Çalışanlar** tüm cüzdanları görebilir ve yönetebilir
-3. **Para çekme** işlemleri çalışan onayı gerektirir
-4. **Para yatırma** işlemleri otomatik onaylanır
-5. Cüzdan bakiyesi negatif olamaz
-6. Her cüzdan tek bir para birimine sahiptir
-
-## 📁 Proje Yapısı
+1. `/auth/login` endpoint'ine kullanıcı bilgileri gönderilir
+2. Başarılı girişte JWT token döner
+3. Diğer API çağrılarında Authorization header'ında token gönderilir:
 
 ```
-src/main/java/com/furkan/digitalWallet/
-├── controller/     # REST API controllers
-├── service/        # Business logic
-├── repository/     # Data access layer
-├── entity/         # JPA entities
-├── security/       # JWT & Security config
-├── config/         # Application configuration
-├── request/        # Request DTOs
-├── exception/      # Custom exceptions
-└── enums/          # Enums (Currency, Role, etc.)
+Authorization: Bearer <jwt-token>
 ```
 
-## 🤝 Katkıda Bulunma
+### Şifre Güvenliği
 
-1. Fork the project
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- Tüm şifreler BCrypt algoritması ile hashlenmiştir
+- Minimum güvenlik gereksinimleri karşılanmaktadır
+
+## Geliştirme
+
+### Yeni Özellik Ekleme
+
+1. Entity/DTO oluşturun
+2. Repository interface'i tanımlayın
+3. Service katmanında iş mantığını uygulayın
+4. Controller'da endpoint'leri oluşturun
+5. Unit ve integration testlerini yazın
+
+### Code Quality
+
+- JaCoCo ile code coverage takibi
+- Maven Surefire ile unit testler
+- Maven Failsafe ile integration testler
+- Lombok ile boilerplate kod azaltma
+
+## Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
+
+## Katkı Sağlama
+
+1. Fork yapın
+2. Feature branch oluşturun
+3. Değişikliklerinizi commit edin
+4. Branch'inizi push edin
+5. Pull Request oluşturun
+
+## İletişim
+
+Proje ile ilgili sorularınız için issue açabilirsiniz.

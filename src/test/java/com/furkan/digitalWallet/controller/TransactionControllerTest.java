@@ -9,7 +9,6 @@ import com.furkan.digitalWallet.request.WithdrawRequest;
 import com.furkan.digitalWallet.security.SecurityUtil;
 import com.furkan.digitalWallet.service.CustomerService;
 import com.furkan.digitalWallet.service.TransactionService;
-import com.furkan.digitalWallet.service.WalletService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,9 +27,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionControllerTest {
-
-    @Mock
-    private WalletService walletService;
 
     @Mock
     private TransactionService transactionService;
@@ -51,12 +46,11 @@ class TransactionControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize static mock for SecurityUtil
         securityUtilMockedStatic = mockStatic(SecurityUtil.class);
 
         customer = new Customer();
         customer.setUsername("testuser");
-        customer.setRole(Role.CUSTOMER); // Assuming Role is an enum in Customer
+        customer.setRole(Role.CUSTOMER);
 
         depositRequest = new DepositRequest();
         withdrawRequest = new WithdrawRequest();
@@ -68,100 +62,73 @@ class TransactionControllerTest {
 
     @AfterEach
     void tearDown() {
-        // Close the static mock
         securityUtilMockedStatic.close();
     }
 
     @Test
     void deposit_Successful_ReturnsTransaction() {
-        // Arrange
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenReturn(customer);
-        when(walletService.deposit(any(DepositRequest.class), any(Customer.class))).thenReturn(transaction);
+        when(transactionService.deposit(any(DepositRequest.class), any(Customer.class))).thenReturn(transaction);
 
-        // Act
         ResponseEntity<Transaction> response = transactionController.deposit(depositRequest);
 
-        // Assert
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
         verify(customerService).getByUsername("testuser");
-        verify(walletService).deposit(depositRequest, customer);
-        verifyNoMoreInteractions(customerService, walletService, transactionService);
+        verify(transactionService).deposit(depositRequest, customer);
+        verifyNoMoreInteractions(customerService, transactionService);
     }
 
     @Test
     void deposit_CustomerNotFound_ThrowsException() {
-        // Arrange
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenThrow(new RuntimeException("Customer not found"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> transactionController.deposit(depositRequest));
 
         verify(customerService).getByUsername("testuser");
-        verifyNoInteractions(walletService, transactionService);
+        verifyNoInteractions(transactionService);
     }
 
     @Test
     void withdraw_Successful_ReturnsTransaction() {
-        // Arrange
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenReturn(customer);
-        when(walletService.withdraw(any(WithdrawRequest.class), any(Customer.class))).thenReturn(transaction);
+        when(transactionService.withdraw(any(WithdrawRequest.class), any(Customer.class))).thenReturn(transaction);
 
-        // Act
         ResponseEntity<Transaction> response = transactionController.withdraw(withdrawRequest);
 
-        // Assert
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
         verify(customerService).getByUsername("testuser");
-        verify(walletService).withdraw(withdrawRequest, customer);
-        verifyNoMoreInteractions(customerService, walletService, transactionService);
+        verify(transactionService).withdraw(withdrawRequest, customer);
+        verifyNoMoreInteractions(customerService, transactionService);
     }
 
     @Test
     void withdraw_CustomerNotFound_ThrowsException() {
-        // Arrange
         securityUtilMockedStatic.when(SecurityUtil::currentUsername).thenReturn("testuser");
         when(customerService.getByUsername("testuser")).thenThrow(new RuntimeException("Customer not found"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> transactionController.withdraw(withdrawRequest));
 
         verify(customerService).getByUsername("testuser");
-        verifyNoInteractions(walletService, transactionService);
+        verifyNoInteractions(transactionService);
     }
 
     @Test
     void decide_Successful_ReturnsTransaction() {
-        // Arrange
         when(transactionService.decide(eq(1L), any(TransactionDecisionRequest.class))).thenReturn(transaction);
 
-        // Act
         ResponseEntity<Transaction> response = transactionController.decide(1L, decisionRequest);
 
-        // Assert
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(transaction, response.getBody());
 
         verify(transactionService).decide(1L, decisionRequest);
-        verifyNoInteractions(customerService, walletService);
-    }
-
-    @Test
-    void decide_UnauthorizedAccess_ThrowsAccessDeniedException() {
-        // Arrange
-        when(transactionService.decide(eq(1L), any(TransactionDecisionRequest.class)))
-                .thenThrow(new AccessDeniedException("Access denied"));
-
-        // Act & Assert
-        assertThrows(AccessDeniedException.class, () -> transactionController.decide(1L, decisionRequest));
-
-        verify(transactionService).decide(1L, decisionRequest);
-        verifyNoInteractions(customerService, walletService);
+        verifyNoMoreInteractions(transactionService);
     }
 }

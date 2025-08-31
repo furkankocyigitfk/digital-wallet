@@ -18,9 +18,9 @@ public class WithdrawRequest {
     private BigDecimal amount;
 
     @NotNull
-    private OppositePartyType oppositePartyType; // IBAN or PAYMENT
+    private OppositePartyType oppositePartyType;
 
     @NotBlank
-    private String destination; // iban or payment id
+    private String destination;
 }
 

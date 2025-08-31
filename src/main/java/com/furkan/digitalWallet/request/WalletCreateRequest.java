@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class WalletCreateRequest {
-    // EMPLOYEE iseniz gerekli; CUSTOMER iseniz yok sayılır ve kendi id'niz kullanılır
+
     private Long customerId;
 
     @NotBlank

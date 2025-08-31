@@ -30,67 +30,67 @@ class SecurityUtilTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize static mock for SecurityContextHolder
+        
         securityContextHolderMockedStatic = mockStatic(SecurityContextHolder.class);
     }
 
     @AfterEach
     void tearDown() {
-        // Close the static mock
+        
         securityContextHolderMockedStatic.close();
     }
 
     @Test
     void currentUsername_AuthenticationPresent_ReturnsUsername() {
-        // Arrange
+        
         when(SecurityContextHolder.getContext()).thenReturn(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn("testuser");
 
-        // Act
+        
         String username = SecurityUtil.currentUsername();
 
-        // Assert
+        
         assertEquals("testuser", username);
     }
 
     @Test
     void currentUsername_AuthenticationNull_ReturnsNull() {
-        // Arrange
+        
         when(SecurityContextHolder.getContext()).thenReturn(securityContext);
         when(securityContext.getAuthentication()).thenReturn(null);
 
-        // Act
+        
         String username = SecurityUtil.currentUsername();
 
-        // Assert
+        
         assertNull(username);
     }
 
     @Test
     void hasRole_AuthenticationPresentAndEmptyAuthorities_ReturnsFalse() {
-        // Arrange
+        
         when(SecurityContextHolder.getContext()).thenReturn(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getAuthorities()).thenReturn(List.of());
 
-        // Act
+        
         boolean hasRole = SecurityUtil.hasRole("USER");
 
-        // Assert
+        
         assertFalse(hasRole);
     }
 
     @Test
     void hasRole_AuthenticationNull_ReturnsFalse() {
-        // Arrange
+        
         when(SecurityContextHolder.getContext()).thenReturn(securityContext);
         when(securityContext.getAuthentication()).thenReturn(null);
 
-        // Act
+        
         boolean hasRole = SecurityUtil.hasRole("USER");
 
-        // Assert
+        
         assertFalse(hasRole);
     }
 }
