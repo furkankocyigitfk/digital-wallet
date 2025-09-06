@@ -15,7 +15,6 @@ import com.furkan.digitalWallet.request.WithdrawRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,7 +29,6 @@ public class TransactionService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Transaction decide(Long transactionId, TransactionDecisionRequest req) {
@@ -57,7 +55,6 @@ public class TransactionService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Transaction deposit(DepositRequest req, Customer actingUser) {
@@ -74,7 +71,6 @@ public class TransactionService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Transaction withdraw(WithdrawRequest req, Customer actingUser) {

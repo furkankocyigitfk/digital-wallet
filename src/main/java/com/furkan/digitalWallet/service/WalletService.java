@@ -18,7 +18,6 @@ import com.furkan.digitalWallet.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -32,7 +31,6 @@ public class WalletService {
 
     @Transactional(
             isolation = Isolation.READ_COMMITTED,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Wallet createWallet(WalletCreateRequest req, Customer actingUser) {
@@ -64,7 +62,6 @@ public class WalletService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Wallet updateBalance(Long walletId, BigDecimal balanceChange, BigDecimal usableBalanceChange) {
@@ -88,7 +85,6 @@ public class WalletService {
      */
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRES_NEW,
             rollbackFor = Exception.class
     )
     public Wallet processTransactionDecision(Transaction transaction, TransactionStatus newStatus) {
@@ -117,7 +113,6 @@ public class WalletService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Wallet processDeposit(DepositRequest req, Customer actingUser) {
@@ -138,7 +133,6 @@ public class WalletService {
 
     @Transactional(
             isolation = Isolation.REPEATABLE_READ,
-            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
     public Wallet processWithdraw(WithdrawRequest req, Customer actingUser) {
@@ -170,12 +164,6 @@ public class WalletService {
             throw new BadRequestException("Bu cüzdana erişim yetkiniz yok");
         }
         return w;
-    }
-
-    @Transactional(readOnly = true)
-    public Wallet findById(Long walletId) {
-        return walletRepository.findById(walletId)
-                .orElseThrow(() -> new NotFoundException("Cüzdan bulunamadı"));
     }
 
     private void validateWalletForWithdraw(Wallet wallet, WithdrawRequest req) {
